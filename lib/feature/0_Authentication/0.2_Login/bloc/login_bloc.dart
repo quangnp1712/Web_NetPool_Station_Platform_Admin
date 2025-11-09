@@ -1,0 +1,109 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:get/get.dart';
+import 'package:web_netpool_station_platform_admin/core/utils/debug_logger.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.1_Authentication/model/authentication_response_model.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.1_Authentication/shared_preferences/auth_shared_preferences.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.2_Login/model/login_model.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.2_Login/repository/login_repository.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.2_Login/shared_preferences/login_shared_preferences.dart';
+
+part 'login_event.dart';
+part 'login_state.dart';
+
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  String _email = "";
+  LoginBloc() : super(LoginInitial()) {
+    on<LoginInitialEvent>(_loginInitialEvent);
+    on<SubmitLoginEvent>(_submitLoginEvent);
+  }
+
+  FutureOr<void> _loginInitialEvent(
+      LoginInitialEvent event, Emitter<LoginState> emit) {
+    emit(Login_ChangeState());
+    _email = "";
+    if (LoginPref.getEmail().toString() != "") {
+      _email = LoginPref.getEmail().toString();
+    } else {
+      emit(LoginInitial());
+    }
+    if (_email != "") {
+      emit(LoginInitial(email: _email));
+    }
+  }
+
+  FutureOr<void> _submitLoginEvent(
+      SubmitLoginEvent event, Emitter<LoginState> emit) async {
+    emit(Login_ChangeState());
+
+    emit(Login_LoadingState(isLoading: true));
+    try {
+      LoginModel loginModel =
+          LoginModel(email: event.email, password: event.password);
+      var results = await LoginRepository().login(loginModel);
+      var responseMessage = results['message'];
+      var responseStatus = results['status'];
+      var responseSuccess = results['success'];
+      var responseBody = results['body'];
+      if (responseSuccess) {
+        AuthenticationModelResponse authenticationModelResponse =
+            AuthenticationModelResponse.fromJson(responseBody);
+        if (authenticationModelResponse.data != null) {
+          AuthenticationPref.setRoleCode(
+              authenticationModelResponse.data?.roleCode ?? "");
+
+          AuthenticationPref.setAccountID(
+              authenticationModelResponse.data?.accountId as int);
+          AuthenticationPref.setAccessToken(
+              authenticationModelResponse.data?.accessToken.toString() ?? "");
+          AuthenticationPref.setAccessExpiredAt(
+              authenticationModelResponse.data?.accessExpiredAt.toString() ??
+                  "");
+          AuthenticationPref.setPassword(event.password.toString());
+        }
+        emit(Login_LoadingState(isLoading: false));
+        emit(LoginSuccessState());
+        DebugLogger.printLog("$responseStatus - $responseMessage - thành công");
+
+        emit(ShowSnackBarActionState(
+            message: "Đăng nhập thành công", success: responseSuccess));
+      } else if (responseStatus == 404) {
+        DebugLogger.printLog("$responseStatus - $responseMessage");
+
+        emit(Login_LoadingState(isLoading: false));
+
+        emit(ShowSnackBarActionState(
+            message: "Email hoặc mật khẩu không đúng",
+            success: responseSuccess));
+      } else if (responseStatus == 401) {
+        DebugLogger.printLog("$responseStatus - $responseMessage");
+
+        emit(Login_LoadingState(isLoading: false));
+
+        emit(ShowSnackBarActionState(
+            message: "Email hoặc mật khẩu không đúng",
+            success: responseSuccess));
+      } else if (responseStatus == 403) {
+        DebugLogger.printLog("Chưa xác thực email");
+
+        emit(Login_LoadingState(isLoading: false));
+
+        emit(ShowSnackBarActionState(
+            message: "Chưa xác thực email", success: responseSuccess));
+      } else {
+        DebugLogger.printLog("$responseStatus - $responseMessage");
+
+        emit(Login_LoadingState(isLoading: false));
+        emit(ShowSnackBarActionState(
+            message: "Lỗi! Vui lòng thử lại", success: responseSuccess));
+      }
+    } catch (e) {
+      emit(Login_LoadingState(isLoading: false));
+      emit(ShowSnackBarActionState(
+          message: "Lỗi! Vui lòng thử lại", success: false));
+      DebugLogger.printLog(e.toString());
+    }
+  }
+}
