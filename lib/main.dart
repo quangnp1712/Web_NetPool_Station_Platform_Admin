@@ -18,14 +18,15 @@ import 'package:web_netpool_station_platform_admin/core/utils/shared_preferences
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.2_Login/bloc/login_bloc.dart';
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_Valid_Email/shared_preferences/verify_email_shared_preferences.dart';
-import 'package:web_netpool_station_platform_admin/feature/2_Account_Admin_Management/2.1_Account_Admin_List/bloc/admin_list_bloc.dart';
-import 'package:web_netpool_station_platform_admin/feature/2_Account_Admin_Management/2.2_Account_Admin_Create/bloc/admin_create_bloc.dart';
-import 'package:web_netpool_station_platform_admin/feature/3_Station_Management/3.1_Station_Approval_List/bloc/station_approval_list_bloc.dart';
-import 'package:web_netpool_station_platform_admin/feature/3_Station_Management/3.3_Station_List/bloc/station_list_bloc.dart';
+import 'package:web_netpool_station_platform_admin/feature/4_Account_Admin_Management/4.1_Account_Admin_List/bloc/admin_list_bloc.dart';
+import 'package:web_netpool_station_platform_admin/feature/4_Account_Admin_Management/4.2_Account_Admin_Create/bloc/admin_create_bloc.dart';
+import 'package:web_netpool_station_platform_admin/feature/5_Station_Management/5.1_Station_Approval_List/bloc/station_approval_list_bloc.dart';
+import 'package:web_netpool_station_platform_admin/feature/5_Station_Management/5.3_Station_List/bloc/station_list_bloc.dart';
+import 'package:web_netpool_station_platform_admin/feature/6_Space_Management/6.1_Space_List/bloc/space_list_bloc.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/404/error.dart';
-import 'package:web_netpool_station_platform_admin/feature/Common/landing_page/controller/menu_controller.dart'
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/controller/menu_controller.dart'
     as menu_controller;
-import 'package:web_netpool_station_platform_admin/feature/Common/landing_page/controller/navigation_controller.dart';
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/controller/navigation_controller.dart';
 import 'package:web_netpool_station_platform_admin/firebase_options.dart';
 
 Future<void> main() async {
@@ -91,6 +92,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => AdminCreateBloc()),
         BlocProvider(create: (_) => StationListBloc()),
         BlocProvider(create: (_) => StationApprovalListBloc()),
+        BlocProvider(create: (_) => SpaceListBloc()),
       ],
       child: GetMaterialApp(
         localizationsDelegates: const [

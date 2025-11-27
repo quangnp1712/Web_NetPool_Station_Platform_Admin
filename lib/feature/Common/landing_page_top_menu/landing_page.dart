@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:web_netpool_station_platform_admin/core/responsive/responsive.dart';
+import 'package:web_netpool_station_platform_admin/core/theme/app_colors.dart';
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/controller/navigation_controller.dart';
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/widget/side_menu.dart';
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/widget/top_navigation_bar.dart';
+
+class LandingPage extends StatefulWidget {
+  LandingPage({super.key});
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: widget.scaffoldKey,
+      extendBodyBehindAppBar: true,
+      appBar: topNavigationBar(context, widget.scaffoldKey),
+      drawer: const Drawer(
+        child: SideMenu(),
+      ),
+      body: ResponsiveWidget(
+          //* Large Screen *//
+          largeScreen: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //$ nav bar
+              Container(width: 280, child: SideMenu()),
+
+              //$ main body
+              Expanded(
+                flex: 5,
+                child: Container(
+                  color: AppColors.bgDark,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 80),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgDark,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10.0),
+                      ),
+                      border: Border(
+                        top: BorderSide(
+                          color: AppColors.primaryGlow, // MÀU VIỀN TRÊN
+                          width: 1.0, // ĐỘ DÀY VIỀN
+                        ),
+                        left: BorderSide(
+                          color: AppColors.primaryGlow, // MÀU VIỀN TRÁI
+                          width: 1.0, // ĐỘ DÀY VIỀN
+                        ),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10.0),
+                      ),
+                      child: localNavigator(),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+          smallScreen: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.bgDark,
+              border: Border(
+                top: BorderSide(
+                  color: AppColors.primaryGlow, // MÀU VIỀN TRÊN
+                  width: 1.0, // ĐỘ DÀY VIỀN
+                ),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30.0),
+              ),
+              child: localNavigator(),
+            ),
+          )),
+    );
+  }
+}

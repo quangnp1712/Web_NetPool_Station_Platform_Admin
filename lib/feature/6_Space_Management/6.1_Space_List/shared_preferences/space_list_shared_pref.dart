@@ -1,0 +1,11 @@
+import 'package:web_netpool_station_platform_admin/core/utils/shared_preferences_helper.dart';
+
+class SpaceListSharedPref {
+  static Future<void> setPassword(String password) async {
+    await SharedPreferencesHelper.preferences.setString("password", password);
+  }
+
+  static String getPassword() {
+    return SharedPreferencesHelper.preferences.getString("password") ?? "";
+  }
+}

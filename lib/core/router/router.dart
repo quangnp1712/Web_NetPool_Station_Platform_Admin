@@ -7,7 +7,7 @@ import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_Valid_Email/pages/send_verify_page.dart';
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_Valid_Email/pages/verify_email_page.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/home_page.dart';
-import 'package:web_netpool_station_platform_admin/feature/Common/landing_page/landing_page.dart';
+import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/landing_page.dart';
 
 class RouteGenerator {
   final LoginBloc loginPageBloc = LoginBloc();
