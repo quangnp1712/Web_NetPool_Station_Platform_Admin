@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:web_netpool_station_platform_admin/core/utils/debug_logger.dart';
 import 'package:web_netpool_station_platform_admin/feature/6_Space_Management/6.1_Space_List/model/space_list_model.dart';
 import 'package:web_netpool_station_platform_admin/feature/6_Space_Management/6.1_Space_List/model/space_list_response_model.dart';
 import 'package:web_netpool_station_platform_admin/feature/6_Space_Management/6.1_Space_List/repository/space_list_repository.dart';
@@ -35,9 +36,8 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
           _spaceList = spaceListModelResponse.data!;
           for (var space in _spaceList) {
             // api chua co feild color va icon
-            space.color = _getRandomCaptchaColor();
-            if (space.icon == null || space.icon == "") {
-              space.icon = space.typeCode;
+            if (space.metadata?.icon == null || space.metadata?.icon == "") {
+              space.metadata?.icon = space.typeCode;
             }
             // ------------
           }
@@ -45,11 +45,15 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
         }
       } else {
         emit(state.copyWith(
-            status: SpaceStatus.failure, message: "Lỗi: $responseMessage"));
+            status: SpaceStatus.failure,
+            message: "Lỗi: $responseMessage",
+            spaces: []));
       }
     } catch (e) {
       emit(state.copyWith(
-          status: SpaceStatus.failure, message: "Lỗi tải dữ liệu: $e"));
+          status: SpaceStatus.failure,
+          message: "Lỗi tải dữ liệu: $e",
+          spaces: []));
     }
   }
 
@@ -57,14 +61,18 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
       CreateSpaceEvent event, Emitter<SpaceListState> emit) async {
     emit(state.copyWith(isActionLoading: true));
     try {
-      SpaceModel spaceModel = SpaceModel(
-        spaceId: event.space.spaceId,
-        typeCode: event.space.typeCode,
-        typeName: event.space.typeName,
-        statusCode: "ACTIVE",
-        // color: event.space.color,
-        // icon: event.space.icon,
+      SpaceMetaDataModel metadata = SpaceMetaDataModel(
+        bgColor: event.space.metadata?.bgColor,
+        icon: event.space.metadata?.icon,
       );
+
+      SpaceModel spaceModel = SpaceModel(
+          spaceId: event.space.spaceId,
+          typeCode: event.space.typeCode,
+          typeName: event.space.typeName,
+          statusCode: "ACTIVE",
+          metadata: metadata);
+
       var results = await SpaceListRepository().createSpace(spaceModel);
       var responseMessage = results['message'];
       var responseStatus = results['status'];
@@ -79,17 +87,31 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
           isActionLoading: false,
         ));
         add(SpaceListInitialEvent());
+      } else if (responseStatus == 409) {
+        emit(state.copyWith(
+            status: SpaceStatus.failure,
+            message: responseMessage,
+            isActionLoading: false));
+        DebugLogger.printLog(responseMessage);
+      } else if (responseStatus == 500) {
+        emit(state.copyWith(
+            status: SpaceStatus.failure,
+            message: "Lỗi Server",
+            isActionLoading: false));
+        DebugLogger.printLog(responseMessage);
       } else {
         emit(state.copyWith(
             status: SpaceStatus.failure,
-            message: "Tạo thất bại: $e",
+            message: "Tạo thất bại",
             isActionLoading: false));
+        DebugLogger.printLog(responseMessage);
       }
     } catch (e) {
       emit(state.copyWith(
           status: SpaceStatus.failure,
           message: "Tạo thất bại: $e",
           isActionLoading: false));
+      DebugLogger.printLog("Tạo thất bại: $e");
     }
   }
 
@@ -97,12 +119,15 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
       UpdateSpaceEvent event, Emitter<SpaceListState> emit) async {
     emit(state.copyWith(isActionLoading: true));
     try {
+      SpaceMetaDataModel metadata = SpaceMetaDataModel(
+        bgColor: event.space.metadata?.bgColor,
+        icon: event.space.metadata?.icon,
+      );
       SpaceModel spaceModel = SpaceModel(
         spaceId: event.space.spaceId,
         typeCode: event.space.typeCode,
         typeName: event.space.typeName,
-        // color: event.space.color,
-        // icon: event.space.icon,
+        metadata: metadata,
       );
       var results = await SpaceListRepository().updateSpace(spaceModel);
       var responseMessage = results['message'];
@@ -120,6 +145,9 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
           message: "Cập nhật thành công!",
           isActionLoading: false,
         ));
+      } else if (responseStatus == 500) {
+        emit(
+            state.copyWith(status: SpaceStatus.failure, message: "Lỗi Server"));
       } else {
         emit(state.copyWith(
             status: SpaceStatus.failure, message: "Lỗi: $responseMessage"));
@@ -150,6 +178,9 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
           message: "Đã xóa loại hình",
           spaces: newSpaces,
         ));
+      } else if (responseStatus == 500) {
+        emit(
+            state.copyWith(status: SpaceStatus.failure, message: "Lỗi Server"));
       } else {
         emit(state.copyWith(
             status: SpaceStatus.failure, message: "Xóa thất bại"));
@@ -189,6 +220,9 @@ class SpaceListBloc extends Bloc<SpaceListEvent, SpaceListState> {
             status: SpaceStatus.success,
             message: "Đổi trạng thái thành công",
             spaces: newSpaces));
+      } else if (responseStatus == 500) {
+        emit(
+            state.copyWith(status: SpaceStatus.failure, message: "Lỗi Server"));
       } else {
         emit(state.copyWith(
             status: SpaceStatus.failure, message: "Đổi trạng thái thất bại"));

@@ -133,7 +133,7 @@ class AdminCreateBloc extends Bloc<AdminCreateEvent, AdminCreateState> {
 
         emit(ShowSnackBarActionState(
             message: "Đăng ký thành công", success: responseSuccess));
-      } else if (responseStatus == 400) {
+      } else if (responseStatus == 409) {
         emit(AdminCreate_LoadingState(isLoading: false));
         emit(ShowSnackBarActionState(
             message: responseMessage, success: responseSuccess));

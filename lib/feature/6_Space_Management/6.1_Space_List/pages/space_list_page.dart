@@ -189,10 +189,10 @@ class _SpaceListPageState extends State<SpaceListPage> {
 
   Widget _buildSpaceCard(BuildContext context, SpaceModel space) {
     final bool isActive = space.statusCode == 'ACTIVE';
-    final Color themeColor = _getColorFromHex(space.color);
+    final Color themeColor = _getColorFromHex(space.metadata?.bgColor);
 
     // [SỬA] Lấy dynamic data thay vì ép kiểu IconData
-    final dynamic iconData = _getIconDataFromCode(space.icon ?? space.typeCode);
+    final dynamic iconData = _getIconDataFromCode(space.metadata?.icon ?? space.typeCode);
 
     return Container(
       decoration: BoxDecoration(
@@ -386,10 +386,10 @@ class _SpaceListPageState extends State<SpaceListPage> {
 
 // State local cho Dialog
     ScreenMode currentMode = mode;
-    String selectedColor = space?.color ?? _presetColors[0];
+    String selectedColor = space?.metadata?.bgColor ?? _presetColors[0];
     // [SỬA] Lấy icon code (String)
     String selectedIconCode =
-        space?.icon ?? space?.typeCode ?? _presetIcons.keys.first;
+        space?.metadata?.icon ?? space?.typeCode ?? _presetIcons.keys.first;
     String status = space?.statusCode ?? "ACTIVE";
     final bool isActive = space?.statusCode == 'ACTIVE';
     showDialog(
@@ -422,8 +422,9 @@ class _SpaceListPageState extends State<SpaceListPage> {
                             nameController.text = space?.typeName ?? "";
                             codeController.text = space?.typeCode ?? "";
                             descController.text = space?.description ?? "";
-                            selectedColor = space?.color ?? _presetColors[0];
-                            selectedIconCode = space?.icon ?? "BIDA";
+                            selectedColor =
+                                space?.metadata?.bgColor ?? _presetColors[0];
+                            selectedIconCode = space?.metadata?.icon ?? "BIDA";
                             status = space?.statusCode ?? "ACTIVE";
                           }
                         });
@@ -697,6 +698,10 @@ class _SpaceListPageState extends State<SpaceListPage> {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKeyDialog.currentState!.validate()) {
+                        SpaceMetaDataModel metadata = SpaceMetaDataModel(
+                          bgColor: selectedColor,
+                          icon: selectedIconCode,
+                        );
                         final newModel = SpaceModel(
                           spaceId: space?.spaceId,
                           typeCode: codeController.text,
@@ -706,8 +711,7 @@ class _SpaceListPageState extends State<SpaceListPage> {
                           statusName: status == "ACTIVE"
                               ? "Đang hoạt động"
                               : "Ngừng hoạt động",
-                          color: selectedColor,
-                          icon: selectedIconCode, // Lưu key (vd: "BIDA")
+                          metadata: metadata,
                         );
 
                         if (isCreate) {

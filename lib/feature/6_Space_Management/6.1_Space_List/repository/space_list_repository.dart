@@ -19,7 +19,7 @@ class SpaceListRepository extends SpaceListApi implements ISpaceListRepository {
     try {
       final String jwtToken = AuthenticationPref.getAccessToken().toString();
 
-      Uri uri = Uri.parse("$viewSpaceUrl");
+      Uri uri = Uri.parse(viewSpaceUrl);
       final client = http.Client();
       final response = await client.get(
         uri,

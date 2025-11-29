@@ -9,8 +9,8 @@ class SpaceModel {
   String? statusCode;
   String? statusName;
   String? description;
-  String? icon;
-  String? color;
+  SpaceMetaDataModel? metadata;
+
   SpaceModel({
     this.spaceId,
     this.typeCode,
@@ -18,8 +18,7 @@ class SpaceModel {
     this.statusCode,
     this.statusName,
     this.description,
-    this.icon,
-    this.color,
+    this.metadata,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,8 +29,7 @@ class SpaceModel {
       'statusCode': statusCode,
       'statusName': statusName,
       'description': description,
-      // 'icon': icon,
-      // 'color': color,
+      'metadata': metadata?.toMap(),
     };
   }
 
@@ -46,8 +44,9 @@ class SpaceModel {
           map['statusName'] != null ? map['statusName'] as String : null,
       description:
           map['description'] != null ? map['description'] as String : null,
-      icon: map['icon'] != null ? map['icon'] as String : null,
-      color: map['color'] != null ? map['color'] as String : null,
+      metadata: map['metadata'] != null
+          ? SpaceMetaDataModel.fromMap(map['metadata'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -64,8 +63,7 @@ class SpaceModel {
     String? statusCode,
     String? statusName,
     String? description,
-    String? color,
-    String? icon,
+    SpaceMetaDataModel? metadata,
   }) {
     return SpaceModel(
       spaceId: spaceId ?? this.spaceId,
@@ -74,8 +72,35 @@ class SpaceModel {
       statusCode: statusCode ?? this.statusCode,
       statusName: statusName ?? this.statusName,
       description: description ?? this.description,
-      color: color ?? this.color,
-      icon: icon ?? this.icon,
+      metadata: metadata ?? this.metadata,
     );
   }
+}
+
+class SpaceMetaDataModel {
+  String? icon;
+  String? bgColor;
+  SpaceMetaDataModel({
+    this.icon,
+    this.bgColor,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'icon': icon,
+      'bgColor': bgColor,
+    };
+  }
+
+  factory SpaceMetaDataModel.fromMap(Map<String, dynamic> map) {
+    return SpaceMetaDataModel(
+      icon: map['icon'] != null ? map['icon'] as String : null,
+      bgColor: map['bgColor'] != null ? map['bgColor'] as String : null,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory SpaceMetaDataModel.fromJson(Map<String, dynamic> source) =>
+      SpaceMetaDataModel.fromMap(source);
 }
