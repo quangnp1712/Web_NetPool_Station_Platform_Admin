@@ -16,7 +16,7 @@ part 'valid_email_state.dart';
 class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
   String _email = "";
 
-  ValidEmailBloc() : super(ValidEmailInitial()) {
+  ValidEmailBloc() : super(ValidEmailState()) {
     on<ValidEmailInitialEvent>(_validEmailInitialEvent);
     on<SendValidCodeEvent>(_sendValidEmailEvent);
     on<SubmitValidEmailEvent>(_submitValidEmailEvent);
@@ -25,17 +25,17 @@ class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
 
   FutureOr<void> _validEmailInitialEvent(
       ValidEmailInitialEvent event, Emitter<ValidEmailState> emit) {
-    emit(ValidEmail_ChangeState());
     if (VerifyEmailPref.getEmail().toString() != "") {
       _email = VerifyEmailPref.getEmail().toString();
     } else {
-      emit(ValidEmailInitial());
+      emit(state.copyWith(blocState: ValidEmailBlocState.Initial));
     }
     if (_email != "") {
-      emit(ValidEmailInitial(email: _email));
+      emit(state.copyWith(email: _email));
+
       add(SendValidCodeEvent(email: _email));
     } else {
-      emit(ValidEmailInitial());
+      emit(state.copyWith(blocState: ValidEmailBlocState.Initial));
     }
   }
 
@@ -48,9 +48,12 @@ class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
 
   FutureOr<void> _sendValidEmailEvent(
       SendValidCodeEvent event, Emitter<ValidEmailState> emit) async {
-    emit(ValidEmail_ChangeState());
+    emit(state.copyWith(
+      blocState: ValidEmailBlocState.Initial,
+      email: _email,
+      status: ValidEmailStatus.loading,
+    ));
 
-    emit(ValidEmail_LoadingState(isLoading: true));
     try {
       VerfyEmailModel validEmailModel = VerfyEmailModel(
         email: event.email,
@@ -63,40 +66,46 @@ class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
       var responseSuccess = results['success'];
       var responseBody = results['body'];
       if (responseSuccess || responseStatus == 200) {
-        emit(ValidEmail_LoadingState(isLoading: false));
-        emit(ShowSnackBarActionState(
-            message: "OTP đã được gửi đến Email $_email",
-            success: responseSuccess));
+        emit(state.copyWith(
+          status: ValidEmailStatus.success,
+          message: "OTP đã được gửi đến Email $_email",
+        ));
+
         DebugLogger.printLog("$responseStatus - $responseMessage - thanh cong");
       } else if (responseStatus == 404) {
-        emit(ValidEmail_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: responseMessage, success: responseSuccess));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Email $_email chưa đăng ký",
+        ));
+        DebugLogger.printLog("$responseStatus - $responseMessage");
       } else if (responseStatus == 401) {
-        emit(ValidEmail_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: responseMessage, success: responseSuccess));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Lỗi! Vui lòng thử lại",
+        ));
+        DebugLogger.printLog("$responseStatus - $responseMessage");
       } else {
-        emit(ValidEmail_LoadingState(isLoading: false));
-        emit(ShowSnackBarActionState(
-            message: "Lỗi! Vui lòng thử lại", success: false));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Lỗi! Vui lòng thử lại",
+        ));
         DebugLogger.printLog("$responseStatus - $responseMessage");
       }
     } catch (e) {
-      emit(ValidEmail_LoadingState(isLoading: false));
-      emit(ShowSnackBarActionState(
-          message: "Lỗi! Vui lòng thử lại", success: false));
+      emit(state.copyWith(
+        status: ValidEmailStatus.failure,
+        message: "Lỗi! Vui lòng thử lại",
+      ));
       DebugLogger.printLog(e.toString());
     }
   }
 
   FutureOr<void> _submitValidEmailEvent(
       SubmitValidEmailEvent event, Emitter<ValidEmailState> emit) async {
-    emit(ValidEmail_ChangeState());
+    emit(state.copyWith(
+      status: ValidEmailStatus.loading,
+    ));
 
-    emit(ValidEmail_LoadingState(isLoading: true));
     try {
       VerfyEmailModel validEmailModel = VerfyEmailModel(
         verificationCode: event.verificationCode,
@@ -108,26 +117,37 @@ class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
       var responseSuccess = results['success'];
       var responseBody = results['body'];
       if (responseSuccess || responseStatus == 200) {
-        emit(ValidEmail_LoadingState(isLoading: false));
         DebugLogger.printLog("$responseStatus - $responseMessage - thanh cong");
         LoginPref.setEmail(_email);
+        emit(state.copyWith(
+          status: ValidEmailStatus.success,
+          message: "Email: $_email xác thực thành công !",
+        ));
         Get.offAllNamed(loginPageRoute);
       } else if (responseStatus == 404) {
-        emit(ValidEmail_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: "Mã OTP không đúng", success: responseSuccess));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Mã OTP không đúng",
+        ));
+        DebugLogger.printLog("$responseStatus - $responseMessage");
       } else if (responseStatus == 401) {
-        emit(ValidEmail_LoadingState(isLoading: false));
-
-        // emit(ShowSnackBarActionState(
-        //     message: responseMessage, success: responseSuccess));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Mã OTP không đúng",
+        ));
+        DebugLogger.printLog("$responseStatus - $responseMessage");
       } else {
-        emit(ValidEmail_LoadingState(isLoading: false));
+        emit(state.copyWith(
+          status: ValidEmailStatus.failure,
+          message: "Lỗi! Vui lòng thử lại",
+        ));
         DebugLogger.printLog("$responseStatus - $responseMessage");
       }
     } catch (e) {
-      emit(ValidEmail_LoadingState(isLoading: false));
+      emit(state.copyWith(
+        status: ValidEmailStatus.failure,
+        message: "Lỗi! Vui lòng thử lại",
+      ));
       DebugLogger.printLog(e.toString());
     }
   }

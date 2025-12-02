@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
+
 import 'package:web_netpool_station_platform_admin/core/responsive/responsive.dart';
 import 'package:web_netpool_station_platform_admin/core/router/routes.dart';
 import 'package:web_netpool_station_platform_admin/core/theme/app_colors.dart';
+import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.1_Authentication/shared_preferences/auth_shared_preferences.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/controller/menu_controller.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/controller/navigation_controller.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/landing_page_top_menu/widget/side_menu_item.dart';
@@ -14,6 +15,9 @@ class SideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    final String userRole = AuthenticationPref.getRoleCode();
+    final bool isSystem = (userRole == "SYSTEM_ADMIN");
+    final bool isPlatform = (userRole == "PLATFORM_ADMIN");
 
     return Container(
       color: AppColors.bgDark,
@@ -49,7 +53,7 @@ class SideMenu extends StatelessWidget {
                 },
               ),
 
-//! Mục 2: Quản lý tài chính
+              //! Mục 2: Quản lý tài chính
               CustomExpansionItem(
                 parentName: paymentParentName,
                 icon: Icons.category_outlined,
@@ -105,18 +109,21 @@ class SideMenu extends StatelessWidget {
                     },
                   ),
                   //$ 3.2 Tạo tài khoản - con
-                  SideMenuChildItem(
-                    itemName: accountCreatePageName,
-                    onTap: () {
-                      if (!menuController.isActive(accountCreatePageName)) {
-                        menuController.changeActiveItemTo(accountCreatePageName,
-                            parentName: accountParentName);
-                        if (ResponsiveWidget.isSmallScreen(context)) Get.back();
-                        navigationController
-                            .navigateAndSyncURL(accountCreatePageRoute);
-                      }
-                    },
-                  )
+                  if (isSystem)
+                    SideMenuChildItem(
+                      itemName: accountCreatePageName,
+                      onTap: () {
+                        if (!menuController.isActive(accountCreatePageName)) {
+                          menuController.changeActiveItemTo(
+                              accountCreatePageName,
+                              parentName: accountParentName);
+                          if (ResponsiveWidget.isSmallScreen(context))
+                            Get.back();
+                          navigationController
+                              .navigateAndSyncURL(accountCreatePageRoute);
+                        }
+                      },
+                    ),
                 ],
               ),
               //! Mục 4: Quản lý Admin - Quản trị vieen
@@ -139,18 +146,20 @@ class SideMenu extends StatelessWidget {
                   ),
 
                   //$ 4.2 Tạo admin - con
-                  SideMenuChildItem(
-                    itemName: adminCreatePageName,
-                    onTap: () {
-                      if (!menuController.isActive(adminCreatePageName)) {
-                        menuController.changeActiveItemTo(adminCreatePageName,
-                            parentName: adminParentName);
-                        if (ResponsiveWidget.isSmallScreen(context)) Get.back();
-                        navigationController
-                            .navigateAndSyncURL(adminCreatePageRoute);
-                      }
-                    },
-                  ),
+                  if (isSystem)
+                    SideMenuChildItem(
+                      itemName: adminCreatePageName,
+                      onTap: () {
+                        if (!menuController.isActive(adminCreatePageName)) {
+                          menuController.changeActiveItemTo(adminCreatePageName,
+                              parentName: adminParentName);
+                          if (ResponsiveWidget.isSmallScreen(context))
+                            Get.back();
+                          navigationController
+                              .navigateAndSyncURL(adminCreatePageRoute);
+                        }
+                      },
+                    ),
                 ],
               ),
               //! Mục 5: Quản lý Station
@@ -159,19 +168,21 @@ class SideMenu extends StatelessWidget {
                 icon: Icons.store_outlined,
                 children: [
                   //$ 5.1 Duyệt station - con
-                  SideMenuChildItem(
-                    itemName: stationApprovalPageName,
-                    onTap: () {
-                      if (!menuController.isActive(stationApprovalPageName)) {
-                        menuController.changeActiveItemTo(
-                            stationApprovalPageName,
-                            parentName: stationParentName);
-                        if (ResponsiveWidget.isSmallScreen(context)) Get.back();
-                        navigationController
-                            .navigateAndSyncURL(stationApprovalPageRoute);
-                      }
-                    },
-                  ),
+                  if (isPlatform)
+                    SideMenuChildItem(
+                      itemName: stationApprovalPageName,
+                      onTap: () {
+                        if (!menuController.isActive(stationApprovalPageName)) {
+                          menuController.changeActiveItemTo(
+                              stationApprovalPageName,
+                              parentName: stationParentName);
+                          if (ResponsiveWidget.isSmallScreen(context))
+                            Get.back();
+                          navigationController
+                              .navigateAndSyncURL(stationApprovalPageRoute);
+                        }
+                      },
+                    ),
 
                   //$ 5.2 Danh sách station - con
                   SideMenuChildItem(

@@ -25,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -36,25 +37,21 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
       bloc: loginPageBloc,
-      listenWhen: (previous, current) => current is LoginActionState,
-      buildWhen: (previous, current) => current is! LoginActionState,
       listener: (context, state) {
-        switch (state.runtimeType) {
-          case LoginSuccessState:
-            // Get.toNamed(rootRoute);
-            Get.offAllNamed(rootRoute);
-            break;
-
-          case ShowSnackBarActionState:
-            final snackBarState = state as ShowSnackBarActionState;
-            ShowSnackBar(snackBarState.message, snackBarState.success);
-            break;
+        if (state.status == LoginStatus.failure) {
+          ShowSnackBar(state.message, false);
+        }
+        if (state.status == LoginStatus.success) {
+          ShowSnackBar(state.message, true);
+        }
+        if (state.blocState == LoginBlocState.LoginSuccessState) {
+          Get.offAllNamed(rootRoute);
         }
       },
       builder: (context, state) {
-        if (state is LoginInitial) {
-          emailController.text = state.email ?? "";
-        }
+        emailController.text = state.email ?? "";
+        isLoading = state.status == LoginStatus.loading;
+
         return Scaffold(
           body: Stack(
             fit: StackFit.expand,
@@ -366,6 +363,26 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
+              // --- WIDGET LOADING TRONG STACK ---
+              if (isLoading)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.containerBackground.withOpacity(
+                        0.8,
+                      ), // Màu nền mờ
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryGlow,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              // ------------------------------------
             ],
           ),
         );

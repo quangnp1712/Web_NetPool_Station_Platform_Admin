@@ -9,6 +9,22 @@ class AuthenticationPref {
     return SharedPreferencesHelper.preferences.getInt("accountId") ?? 0;
   }
 
+  static Future<void> setUsername(String username) async {
+    await SharedPreferencesHelper.preferences.setString("username", username);
+  }
+
+  static String getUsername() {
+    return SharedPreferencesHelper.preferences.getString("username") ?? "";
+  }
+
+  static Future<void> setAvatarUrl(String avatarUrl) async {
+    await SharedPreferencesHelper.preferences.setString("avatarUrl", avatarUrl);
+  }
+
+  static String getAvatarUrl() {
+    return SharedPreferencesHelper.preferences.getString("avatarUrl") ?? "";
+  }
+
   static Future<void> setAccessToken(String token) async {
     await SharedPreferencesHelper.preferences.setString("accessToken", token);
   }
@@ -41,5 +57,30 @@ class AuthenticationPref {
 
   static String getPassword() {
     return SharedPreferencesHelper.preferences.getString("password") ?? "";
+  }
+
+  static Future<void> setEmail(String email) async {
+    await SharedPreferencesHelper.preferences.setString("email", email);
+  }
+
+  static String getEmail() {
+    return SharedPreferencesHelper.preferences.getString("email") ?? "";
+  }
+
+  static Future<void> setStationId(String stationId) async {
+    await SharedPreferencesHelper.preferences.setString("stationId", stationId);
+  }
+
+  static String getStationId() {
+    return SharedPreferencesHelper.preferences.getString("stationId") ?? "";
+  }
+
+  static Future<void> setStationsJson(List<String> stations) async {
+    await SharedPreferencesHelper.preferences
+        .setStringList("stations", stations);
+  }
+
+  static List<String> getStationsJson() {
+    return SharedPreferencesHelper.preferences.getStringList("stations") ?? [];
   }
 }

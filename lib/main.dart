@@ -86,12 +86,19 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        //$ authentication
         BlocProvider(create: (_) => LoginBloc()),
         BlocProvider(create: (_) => ValidEmailBloc()),
+
+        //$ Account Admin
         BlocProvider(create: (_) => AdminListBloc()),
         BlocProvider(create: (_) => AdminCreateBloc()),
+
+        //$ Station
         BlocProvider(create: (_) => StationListBloc()),
         BlocProvider(create: (_) => StationApprovalListBloc()),
+
+        //$ Space
         BlocProvider(create: (_) => SpaceListBloc()),
       ],
       child: GetMaterialApp(

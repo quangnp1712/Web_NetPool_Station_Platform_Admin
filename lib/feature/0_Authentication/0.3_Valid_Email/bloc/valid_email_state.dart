@@ -1,34 +1,56 @@
+// ignore_for_file: constant_identifier_names
+
 part of 'valid_email_bloc.dart';
 
-sealed class ValidEmailState extends Equatable {
-  const ValidEmailState();
+//$ status
+enum ValidEmailStatus {
+  initial,
+  loading,
+  success,
+  failure,
+}
+
+//$ blocState
+enum ValidEmailBlocState {
+  Initial,
+  ShowRegisterState,
+  ValidEmailSuccessState,
+}
+
+//$ ValidEmailState
+class ValidEmailState extends Equatable {
+  final String? email;
+  final String message;
+
+  final ValidEmailBlocState blocState;
+  final ValidEmailStatus status;
+
+  const ValidEmailState({
+    this.email,
+    this.message = '',
+    this.blocState = ValidEmailBlocState.Initial,
+    this.status = ValidEmailStatus.initial,
+  });
+
+  ValidEmailState copyWith({
+    ValidEmailBlocState? blocState,
+    ValidEmailStatus? status,
+    String? email,
+    String? message,
+  }) {
+    return ValidEmailState(
+      blocState: blocState ?? ValidEmailBlocState.Initial,
+      status: status ?? ValidEmailStatus.initial,
+      email: email ?? this.email,
+      message: message ?? this.message,
+    );
+  }
 
   @override
-  List<Object> get props => [];
-}
-
-final class ValidEmailInitial extends ValidEmailState {
-  String? email;
-  ValidEmailInitial({this.email});
-}
-
-abstract class ValidEmailActionState extends ValidEmailState {}
-
-class ShowRegisterState extends ValidEmailActionState {}
-
-class ValidEmail_ChangeState extends ValidEmailActionState {}
-
-class ValidEmail_LoadingState extends ValidEmailActionState {
-  final bool isLoading;
-
-  ValidEmail_LoadingState({required this.isLoading});
-}
-
-class ValidEmailSuccessState extends ValidEmailActionState {}
-
-class ShowSnackBarActionState extends ValidEmailActionState {
-  final String message;
-  final bool success;
-
-  ShowSnackBarActionState({required this.success, required this.message});
+  List<Object?> get props => [
+        blocState,
+        status,
+        message,
+        email,
+      ];
 }

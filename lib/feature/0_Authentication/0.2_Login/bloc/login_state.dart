@@ -1,34 +1,55 @@
-// ignore_for_file: camel_case_types
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: camel_case_types, constant_identifier_names
 
 part of 'login_bloc.dart';
 
-sealed class LoginState extends Equatable {
-  const LoginState();
+// status
+enum LoginStatus {
+  initial,
+  loading,
+  success,
+  failure,
+}
+
+// blocState
+enum LoginBlocState {
+  Initial,
+  LoginSuccessState,
+}
+
+class LoginState extends Equatable {
+  final String? email;
+  final String message;
+
+  final LoginBlocState blocState;
+  final LoginStatus status;
+
+  const LoginState({
+    this.email,
+    this.message = '',
+    this.blocState = LoginBlocState.Initial,
+    this.status = LoginStatus.initial,
+  });
+
+  LoginState copyWith({
+    LoginBlocState? blocState,
+    LoginStatus? status,
+    String? email,
+    String? message,
+  }) {
+    return LoginState(
+      blocState: blocState ?? LoginBlocState.Initial,
+      status: status ?? LoginStatus.initial,
+      email: email ?? this.email,
+      message: message ?? this.message,
+    );
+  }
 
   @override
-  List<Object> get props => [];
-}
-
-final class LoginInitial extends LoginState {
-  String? email;
-  LoginInitial({this.email});
-}
-
-abstract class LoginActionState extends LoginState {}
-
-class Login_ChangeState extends LoginActionState {}
-
-class Login_LoadingState extends LoginActionState {
-  final bool isLoading;
-
-  Login_LoadingState({required this.isLoading});
-}
-
-class LoginSuccessState extends LoginActionState {}
-
-class ShowSnackBarActionState extends LoginActionState {
-  final String message;
-  final bool success;
-
-  ShowSnackBarActionState({required this.success, required this.message});
+  List<Object?> get props => [
+        blocState,
+        status,
+        message,
+        email,
+      ];
 }

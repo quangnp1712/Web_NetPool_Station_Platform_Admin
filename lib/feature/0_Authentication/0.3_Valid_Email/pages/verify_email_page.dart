@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:web_netpool_station_platform_admin/core/theme/app_colors.dart';
 import 'package:web_netpool_station_platform_admin/feature/0_Authentication/0.3_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:web_netpool_station_platform_admin/feature/Common/snackbar/snackbar.dart';
 
@@ -23,6 +24,8 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
 
   TextEditingController codeController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  bool isLoading = false;
+
   @override
   void initState() {
     validEmailPageBloc.add(ValidEmailInitialEvent());
@@ -33,20 +36,18 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<ValidEmailBloc, ValidEmailState>(
       bloc: validEmailPageBloc,
-      listenWhen: (previous, current) => current is ValidEmailActionState,
-      buildWhen: (previous, current) => current is! ValidEmailActionState,
       listener: (context, state) {
-        switch (state.runtimeType) {
-          case ShowSnackBarActionState:
-            final snackBarState = state as ShowSnackBarActionState;
-            ShowSnackBar(snackBarState.message, snackBarState.success);
-            break;
+        if (state.status == ValidEmailStatus.failure) {
+          ShowSnackBar(state.message, false);
+        }
+        if (state.status == ValidEmailStatus.success) {
+          ShowSnackBar(state.message, true);
         }
       },
       builder: (context, state) {
-        if (state is ValidEmailInitial) {
-          emailController.text = state.email ?? "";
-        }
+        emailController.text = state.email ?? "";
+        isLoading = state.status == ValidEmailStatus.loading;
+
         return Scaffold(
           body: Stack(
             fit: StackFit.expand,
@@ -318,6 +319,26 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                   ],
                 ),
               ),
+              // --- WIDGET LOADING TRONG STACK ---
+              if (isLoading)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.containerBackground.withOpacity(
+                        0.8,
+                      ), // Màu nền mờ
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryGlow,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              // ------------------------------------
             ],
           ),
         );
