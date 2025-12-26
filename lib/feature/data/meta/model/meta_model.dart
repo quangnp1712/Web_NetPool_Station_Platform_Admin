@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+//! MetaModel
 class MetaModel {
   int? pageSize;
   int? current;
