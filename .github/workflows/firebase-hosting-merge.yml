@@ -21,7 +21,7 @@ jobs:
           cache: true
       
       # 3. Build web
-      - run: flutter build web --release
+      - run: flutter build web --release --dart-define=DOMAIN="${{ secrets.DOMAIN_URL }}"
 
       # 4. Deploy lên Firebase
       - uses: FirebaseExtended/action-hosting-deploy@v0
